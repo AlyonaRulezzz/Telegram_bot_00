@@ -1,17 +1,16 @@
 const TelegramApi = require('node-telegram-bot-api')
-
+const {gameOptions, againOptions} = require('./options')
 const token = '5529886412:AAFt6V2h9jZtrPJcM7vI-uDurXu9vk1ldhg'
 
 const bot = new TelegramApi(token, {polling: true})
 
 const chats = {}
 
-const gameOptions = {
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{text: 'Текст кнопки', callback_data: 'egr'}]
-        ]
-    })
+const startGame = async (chatId) => {
+        await bot.sendMessage(chatId, 'Я загадаю цифру от 0 до 9, а ты угадай её!)');
+        const randomNumber = Math.floor(Math.random() * 10)
+        chats[chatId] = randomNumber;
+        await bot.sendMessage(chatId, 'Отгадывай ;)', gameOptions);
 }
 
 const start = () => {
@@ -35,13 +34,23 @@ const start = () => {
             return bot.sendMessage(chatId, 'Тебя зовут ' + user_name + ')');
         }
         if (text === '/game') {
-            await bot.sendMessage(chatId, 'Я загадаю цифру от 0 до 9, а ты угадай её!)');
-            const randomNumber = Math.floor(Math.random() * 10)
-            chats[chatId] = randomNumber;
-            return bot.sendMessage(chatId, 'Отгадывай ;)', gameOptions);
+            return startGame(chatId);
         }
         await bot.sendSticker(chatId, 'https://tlgrm.ru/_/stickers/306/6e2/3066e228-42a5-31a3-8507-cf303d3e7afe/5.webp');
         return bot.sendMessage(chatId, 'Я тебя не понимаю, попробуй ещё раз...');
+    })
+
+    bot.on('callback_query', async msg => {
+        const data = msg.data;
+        const chatId = msg.message.chat.id;
+        if (data === '/again') {
+            return startGame(chatId);
+        }
+        if (data === chats[chatId]) {
+            return bot.sendMessage(chatId, 'Поздравляю, ты отгадал цифру!)', againOptions)
+        } else {
+            return bot.sendMessage(chatId, 'К сожалению, ты не угадал, это была цифра ' + chats[chatId], againOptions)
+        }
     })
 }
 
