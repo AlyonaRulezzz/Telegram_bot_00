@@ -46,10 +46,15 @@ const start = () => {
         if (data === '/again') {
             return startGame(chatId);
         }
-        if (data === chats[chatId]) {
-            return bot.sendMessage(chatId, 'Поздравляю, ты отгадал цифру!)', againOptions)
-        } else {
+        if (data != chats[chatId]) {
+            console.log(data + ' ' + chats[chatId])
+            await bot.sendSticker(chatId, 'https://tlgrm.ru/_/stickers/306/6e2/3066e228-42a5-31a3-8507-cf303d3e7afe/12.webp')
             return bot.sendMessage(chatId, 'К сожалению, ты не угадал, это была цифра ' + chats[chatId], againOptions)
+            
+        } else {
+            console.log('зашёл')
+            await bot.sendSticker(chatId, 'https://cdn.tlgrm.app/stickers/306/6e2/3066e228-42a5-31a3-8507-cf303d3e7afe/256/6.webp')
+            return bot.sendMessage(chatId, 'Поздравляю, ты отгадал цифру!)', againOptions)
         }
     })
 }
